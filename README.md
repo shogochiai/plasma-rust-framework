@@ -7,3 +7,16 @@ This repositry must be conpatible with [plasma-core](https://github.com/plasma-g
 - Gradually try shifting from JS to Rust
 - For browser and NodeJS: Publish WASM to WAPM, and publish generated wrapper & @types to NPM
 - For App: Compile rust to each target environment
+
+
+## Build Source Code
+
+```
+cargo build --release
+```
+
+### Run Manually
+
+```
+./target/release/plasma-chamber 
+```
