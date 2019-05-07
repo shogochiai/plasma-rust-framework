@@ -6,11 +6,29 @@ use ethereum_types::Address;
 use rlp::{Decodable, DecoderError, Encodable, Rlp, RlpStream};
 
 pub struct StateUpdate {
-    pub start: u64,
-    pub end: u64,
-    pub block: u64,
-    pub plasma_contract: Address,
-    pub new_state: StateObject,
+    start: u64,
+    end: u64,
+    block: u64,
+    plasma_contract: Address,
+    new_state: StateObject,
+}
+
+impl StateUpdate {
+    pub fn new(
+        start: u64,
+        end: u64,
+        block: u64,
+        plasma_contract: Address,
+        new_state: StateObject,
+    ) -> StateUpdate {
+        return StateUpdate {
+            start: start,
+            end: end,
+            block: block,
+            plasma_contract: plasma_contract,
+            new_state: new_state,
+        };
+    }
 }
 
 impl Encodable for StateUpdate {
@@ -51,17 +69,8 @@ mod tests {
     fn test_rlp_encode() {
         let message = "parameters".as_bytes();
         let message_bytes = Bytes::from(message);
-        let state_object = StateObject {
-            predicate: Address::zero(),
-            parameters: message_bytes,
-        };
-        let state_update = StateUpdate {
-            start: 0,
-            end: 0,
-            block: 0,
-            plasma_contract: Address::zero(),
-            new_state: state_object,
-        };
+        let state_object = StateObject::new(Address::zero(), message_bytes);
+        let state_update = StateUpdate::new(0, 0, 0, Address::zero(), state_object);
         let encoded = rlp::encode(&state_update);
         let _decoded: StateUpdate = rlp::decode(&encoded).unwrap();
         assert_eq!(_decoded.start, state_update.start);

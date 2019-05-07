@@ -44,21 +44,9 @@ mod tests {
         let message_bytes = Bytes::from(message);
         let witness = "witness".as_bytes();
         let witness_bytes = Bytes::from(witness);
-        let state_object = StateObject {
-            predicate: Address::zero(),
-            parameters: message_bytes,
-        };
-        let state_update = StateUpdate {
-            start: 0,
-            end: 0,
-            block: 0,
-            plasma_contract: Address::zero(),
-            new_state: state_object,
-        };
-        let transaction = Transaction {
-            state_update: state_update,
-            transaction_witness: witness_bytes,
-        };
+        let state_object = StateObject::new(Address::zero(), message_bytes);
+        let state_update = StateUpdate::new(0, 0, 0, Address::zero(), state_object);
+        let transaction = Transaction::new(state_update, witness_bytes);
         let _signed_transaction = SignedTransaction {
             transactions: vec![transaction],
         };

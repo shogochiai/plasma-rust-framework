@@ -6,8 +6,17 @@ use ethereum_types::Address;
 use rlp::{Decodable, DecoderError, Encodable, Rlp, RlpStream};
 
 pub struct StateObject {
-    pub predicate: Address,
-    pub parameters: Bytes,
+    predicate: Address,
+    parameters: Bytes,
+}
+
+impl StateObject {
+    pub fn new(predicate: Address, parameters: Bytes) -> StateObject {
+        return StateObject {
+            predicate: predicate,
+            parameters: parameters,
+        };
+    }
 }
 
 impl Encodable for StateObject {
@@ -41,10 +50,7 @@ mod tests {
     fn test_rlp_encode() {
         let message = "Hello World".as_bytes();
         let message_bytes = Bytes::from(message);
-        let _state_object = StateObject {
-            predicate: Address::zero(),
-            parameters: message_bytes,
-        };
+        let _state_object = StateObject::new(Address::zero(), message_bytes);
         let encoded = rlp::encode(&_state_object);
         let _decoded: StateObject = rlp::decode(&encoded).unwrap();
         assert_eq!(_decoded.predicate, _state_object.predicate);
