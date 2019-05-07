@@ -1,5 +1,6 @@
+pub mod block;
 mod included_transaction;
-mod signed_transaction;
+pub mod signed_transaction;
 mod state_object;
 mod state_update;
 mod transaction;
