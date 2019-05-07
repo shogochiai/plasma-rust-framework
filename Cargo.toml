@@ -1,0 +1,22 @@
+[package]
+name = "plasma-chamber"
+version = "0.1.0"
+authors = ["Cryptoeconomics Lab <info@cryptoeconomicslab.com>"]
+edition = "2018"
+
+[lib]
+path = "plasma-chamber/lib.rs"
+
+[[bin]]
+path = "plasma-chamber/main.rs"
+name = "plasma-chamber"
+
+[workspace]
+
+members = [
+	"core",
+]
+
+[dependencies]
+
+clippy = {version = "*", optional = true}
