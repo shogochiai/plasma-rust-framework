@@ -6,8 +6,17 @@ use bytes::Bytes;
 use rlp::{Decodable, DecoderError, Encodable, Rlp, RlpStream};
 
 pub struct Transaction {
-    pub state_update: StateUpdate,
-    pub transaction_witness: Bytes,
+    state_update: StateUpdate,
+    transaction_witness: Bytes,
+}
+
+impl Transaction {
+    pub fn new(state_update: StateUpdate, transaction_witness: Bytes) -> Transaction {
+        return Transaction {
+            state_update: state_update,
+            transaction_witness: transaction_witness,
+        };
+    }
 }
 
 impl Encodable for Transaction {
