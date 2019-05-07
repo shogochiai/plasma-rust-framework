@@ -15,8 +15,10 @@ name = "plasma-chamber"
 
 members = [
 	"core",
+	"operator",
 ]
 
 [dependencies]
 
 clippy = {version = "*", optional = true}
+plasma-operator = { path = "./operator" }
