@@ -1,3 +1,11 @@
+//
+// Created on Wed May 08 2019
+//
+// Copyright (c) 2019 Cryptoeconomics Lab, Inc.
+// This file is part of Plasma Chamber.
+//
+
+/// json rpc server.
 use log::error;
 
 use super::error::Error;
@@ -6,6 +14,7 @@ use super::rpc::plasmarpcimpl::PlasmaRpcImpl;
 use jsonrpc_http_server::jsonrpc_core::IoHandler;
 use jsonrpc_http_server::ServerBuilder;
 
+/// Options for Plasma JSON RPC server.
 pub struct HttpOption {
     threads: usize,
     url: String,
