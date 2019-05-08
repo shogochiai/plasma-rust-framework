@@ -1,7 +1,9 @@
 use log::error;
 
 use super::error::Error;
-use jsonrpc_http_server::jsonrpc_core::{IoHandler, Params, Value};
+use super::rpc::plasmarpc::PlasmaRpc;
+use super::rpc::plasmarpcimpl::PlasmaRpcImpl;
+use jsonrpc_http_server::jsonrpc_core::IoHandler;
 use jsonrpc_http_server::ServerBuilder;
 
 pub struct HttpOption {
@@ -20,9 +22,9 @@ impl Default for HttpOption {
 
 pub fn start(options: HttpOption) {
     let mut io = IoHandler::new();
-    io.add_method("say_hello", |_params: Params| {
-        Ok(Value::String("hello".to_string()))
-    });
+
+    let rpc = PlasmaRpcImpl;
+    io.extend_with(rpc.to_delegate());
 
     match options
         .url
