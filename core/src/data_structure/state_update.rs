@@ -21,13 +21,13 @@ impl StateUpdate {
         plasma_contract: Address,
         new_state: StateObject,
     ) -> StateUpdate {
-        return StateUpdate {
-            start: start,
-            end: end,
-            block: block,
-            plasma_contract: plasma_contract,
-            new_state: new_state,
-        };
+        StateUpdate {
+            start,
+            end,
+            block,
+            plasma_contract,
+            new_state,
+        }
     }
 }
 
@@ -45,15 +45,13 @@ impl Encodable for StateUpdate {
 impl Decodable for StateUpdate {
     fn decode(rlp: &Rlp) -> Result<Self, DecoderError> {
         let new_state_result: Result<StateObject, DecoderError> = rlp.val_at(4);
-        return new_state_result.map(|new_state| {
-            return StateUpdate {
-                start: rlp.val_at(0).unwrap_or(0),
-                end: rlp.val_at(1).unwrap_or(0),
-                block: rlp.val_at(2).unwrap_or(0),
-                plasma_contract: rlp.val_at(3).unwrap_or(Address::zero()),
-                new_state: new_state,
-            };
-        });
+        new_state_result.map(|new_state| StateUpdate {
+            start: rlp.val_at(0).unwrap_or(0),
+            end: rlp.val_at(1).unwrap_or(0),
+            block: rlp.val_at(2).unwrap_or(0),
+            plasma_contract: rlp.val_at(3).unwrap_or_else(|_| Address::zero()),
+            new_state,
+        })
     }
 }
 
@@ -67,8 +65,7 @@ mod tests {
 
     #[test]
     fn test_rlp_encode() {
-        let message = "parameters".as_bytes();
-        let message_bytes = Bytes::from(message);
+        let message_bytes = Bytes::from(&b"parameters"[..]);
         let state_object = StateObject::new(Address::zero(), message_bytes);
         let state_update = StateUpdate::new(0, 0, 0, Address::zero(), state_object);
         let encoded = rlp::encode(&state_update);

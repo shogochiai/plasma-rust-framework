@@ -12,10 +12,10 @@ pub struct Transaction {
 
 impl Transaction {
     pub fn new(state_update: StateUpdate, transaction_witness: Bytes) -> Transaction {
-        return Transaction {
-            state_update: state_update,
-            transaction_witness: transaction_witness,
-        };
+        Transaction {
+            state_update,
+            transaction_witness,
+        }
     }
 }
 
@@ -30,11 +30,9 @@ impl Encodable for Transaction {
 impl Decodable for Transaction {
     fn decode(rlp: &Rlp) -> Result<Self, DecoderError> {
         let bytes_result: Result<Vec<u8>, DecoderError> = rlp.val_at(1);
-        bytes_result.map(|bytes| {
-            return Transaction {
-                state_update: rlp.val_at(0).unwrap(),
-                transaction_witness: Bytes::from(bytes),
-            };
+        bytes_result.map(|bytes| Transaction {
+            state_update: rlp.val_at(0).unwrap(),
+            transaction_witness: Bytes::from(bytes),
         })
     }
 }

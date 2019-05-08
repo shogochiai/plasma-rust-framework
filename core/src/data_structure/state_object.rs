@@ -12,10 +12,10 @@ pub struct StateObject {
 
 impl StateObject {
     pub fn new(predicate: Address, parameters: Bytes) -> StateObject {
-        return StateObject {
-            predicate: predicate,
-            parameters: parameters,
-        };
+        StateObject {
+            predicate,
+            parameters,
+        }
     }
 }
 
@@ -30,11 +30,9 @@ impl Encodable for StateObject {
 impl Decodable for StateObject {
     fn decode(rlp: &Rlp) -> Result<Self, DecoderError> {
         let bytes_result: Result<Vec<u8>, DecoderError> = rlp.val_at(1);
-        bytes_result.map(|bytes| {
-            return StateObject {
-                predicate: rlp.val_at(0).unwrap_or(Address::zero()),
-                parameters: Bytes::from(bytes),
-            };
+        bytes_result.map(|bytes| StateObject {
+            predicate: rlp.val_at(0).unwrap_or_else(|_| Address::zero()),
+            parameters: Bytes::from(bytes),
         })
     }
 }
@@ -48,9 +46,8 @@ mod tests {
 
     #[test]
     fn test_rlp_encode() {
-        let message = "Hello World".as_bytes();
-        let message_bytes = Bytes::from(message);
-        let _state_object = StateObject::new(Address::zero(), message_bytes);
+        let parameters_bytes = Bytes::from(&b"parameters"[..]);
+        let _state_object = StateObject::new(Address::zero(), parameters_bytes);
         let encoded = rlp::encode(&_state_object);
         let _decoded: StateObject = rlp::decode(&encoded).unwrap();
         assert_eq!(_decoded.predicate, _state_object.predicate);

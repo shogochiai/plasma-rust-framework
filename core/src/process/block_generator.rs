@@ -11,6 +11,6 @@ pub struct BlockGenerator {}
 impl BlockGenerator {
     pub fn generate(signed_transactions: Vec<SignedTransaction>) -> Result<Block, Error> {
         // TODO: caluculate merkle root
-        return Ok(Block::new(signed_transactions, H256::zero()));
+        Ok(Block::new(signed_transactions, H256::zero()))
     }
 }

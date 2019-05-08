@@ -5,6 +5,7 @@
 // This file is part of Plasma Chamber.
 //
 
+extern crate failure;
 extern crate serde;
 extern crate serde_derive;
 
@@ -15,7 +16,7 @@ pub mod rpc;
 /// Plasma JSON RPC server.
 pub mod server;
 
-use self::server::start;
+use self::server::get_server;
 use env_logger;
 use std::env;
 
@@ -24,5 +25,6 @@ pub fn entry() {
     env::set_var("RUST_LOG", "info");
     env_logger::init();
     println!("Hello, operator!!");
-    start(Default::default());
+    let server = get_server(Default::default()).expect("Unable to start rpc server.");
+    server.wait();
 }

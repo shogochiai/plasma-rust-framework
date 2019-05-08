@@ -636,6 +636,7 @@ name = "plasma-operator"
 version = "0.1.0"
 dependencies = [
  "env_logger 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "jsonrpc-core 11.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "jsonrpc-core-client 11.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "jsonrpc-derive 11.0.0 (registry+https://github.com/rust-lang/crates.io-index)",

@@ -1,8 +1,6 @@
 extern crate ethereum_types;
 extern crate rlp;
 
-use super::state_object::StateObject;
-use super::state_update::StateUpdate;
 use super::transaction::Transaction;
 use rlp::{Decodable, DecoderError, Encodable, Rlp, RlpStream};
 
@@ -18,13 +16,11 @@ impl Encodable for SignedTransaction {
 
 impl Decodable for SignedTransaction {
     fn decode(rlp: &Rlp) -> Result<Self, DecoderError> {
-        if (!rlp.is_list()) {
+        if !rlp.is_list() {
             return Err(DecoderError::Custom("Provided byte data isn't RLP list."));
         }
         let transactions_result: Result<Vec<Transaction>, DecoderError> = rlp.as_list();
-        return transactions_result.map(|list| {
-            return SignedTransaction { transactions: list };
-        });
+        transactions_result.map(|list| SignedTransaction { transactions: list })
     }
 }
 
@@ -32,19 +28,17 @@ impl Decodable for SignedTransaction {
 mod tests {
     use super::DecoderError;
     use super::SignedTransaction;
-    use super::StateObject;
-    use super::StateUpdate;
     use super::Transaction;
+    use crate::data_structure::state_object::StateObject;
+    use crate::data_structure::state_update::StateUpdate;
     use bytes::Bytes;
     use ethereum_types::Address;
 
     #[test]
     fn test_rlp_encode() {
-        let message = "parameters".as_bytes();
-        let message_bytes = Bytes::from(message);
-        let witness = "witness".as_bytes();
-        let witness_bytes = Bytes::from(witness);
-        let state_object = StateObject::new(Address::zero(), message_bytes);
+        let parameters_bytes = Bytes::from(&b"parameters"[..]);
+        let witness_bytes = Bytes::from(&b"witness"[..]);
+        let state_object = StateObject::new(Address::zero(), parameters_bytes);
         let state_update = StateUpdate::new(0, 0, 0, Address::zero(), state_object);
         let transaction = Transaction::new(state_update, witness_bytes);
         let _signed_transaction = SignedTransaction {
