@@ -6,13 +6,11 @@
 //
 
 /// json rpc server.
-use log::error;
-
 use super::error::Error;
 use super::rpc::plasmarpc::PlasmaRpc;
 use super::rpc::plasmarpcimpl::PlasmaRpcImpl;
 use jsonrpc_http_server::jsonrpc_core::IoHandler;
-use jsonrpc_http_server::ServerBuilder;
+use jsonrpc_http_server::{Server, ServerBuilder};
 
 /// Options for Plasma JSON RPC server.
 pub struct HttpOption {
@@ -29,23 +27,16 @@ impl Default for HttpOption {
     }
 }
 
-pub fn start(options: HttpOption) {
+pub fn get_server(options: HttpOption) -> Result<Server, Error> {
     let mut io = IoHandler::new();
 
     let rpc = PlasmaRpcImpl;
     io.extend_with(rpc.to_delegate());
 
-    match options
-        .url
-        .parse()
-        .map_err(|_err| Error::ParseError(_err))
-        .and_then(|url| {
-            ServerBuilder::new(io)
-                .threads(options.threads)
-                .start_http(&url)
-                .map_err(|_err| Error::IoError(_err))
-        }) {
-        Ok(server) => server.wait(),
-        Err(err) => error!("Error at server.wait: {:?}", err),
-    }
+    options.url.parse().map_err(Into::into).and_then(|url| {
+        ServerBuilder::new(io)
+            .threads(options.threads)
+            .start_http(&url)
+            .map_err(Into::into)
+    })
 }
