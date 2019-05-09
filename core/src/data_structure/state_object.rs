@@ -29,10 +29,11 @@ impl Encodable for StateObject {
 
 impl Decodable for StateObject {
     fn decode(rlp: &Rlp) -> Result<Self, DecoderError> {
-        let bytes_result: Result<Vec<u8>, DecoderError> = rlp.val_at(1);
-        bytes_result.map(|bytes| StateObject {
-            predicate: rlp.val_at(0).unwrap_or_else(|_| Address::zero()),
-            parameters: Bytes::from(bytes),
+        let predicate: Address = rlp.val_at(0)?;
+        let parameters: Vec<u8> = rlp.val_at(1)?;
+        Ok(StateObject {
+            predicate,
+            parameters: Bytes::from(parameters),
         })
     }
 }

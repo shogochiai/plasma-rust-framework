@@ -29,14 +29,11 @@ impl Encodable for Block {
 
 impl Decodable for Block {
     fn decode(rlp: &Rlp) -> Result<Self, DecoderError> {
-        let signed_transactions_result: Result<Vec<SignedTransaction>, DecoderError> =
-            rlp.list_at(0);
-        let root_result: Result<H256, DecoderError> = rlp.val_at(1);
-        signed_transactions_result.and_then(|signed_transactions| {
-            root_result.map(|root| Block {
-                signed_transactions,
-                root,
-            })
+        let signed_transactions: Vec<SignedTransaction> = rlp.list_at(0)?;
+        let root: H256 = rlp.val_at(1)?;
+        Ok(Block {
+            signed_transactions,
+            root,
         })
     }
 }

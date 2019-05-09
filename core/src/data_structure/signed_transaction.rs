@@ -19,8 +19,8 @@ impl Decodable for SignedTransaction {
         if !rlp.is_list() {
             return Err(DecoderError::Custom("Provided byte data isn't RLP list."));
         }
-        let transactions_result: Result<Vec<Transaction>, DecoderError> = rlp.as_list();
-        transactions_result.map(|list| SignedTransaction { transactions: list })
+        let transactions: Vec<Transaction> = rlp.as_list()?;
+        Ok(SignedTransaction { transactions })
     }
 }
 

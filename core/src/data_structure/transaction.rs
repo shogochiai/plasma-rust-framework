@@ -29,10 +29,11 @@ impl Encodable for Transaction {
 
 impl Decodable for Transaction {
     fn decode(rlp: &Rlp) -> Result<Self, DecoderError> {
-        let bytes_result: Result<Vec<u8>, DecoderError> = rlp.val_at(1);
-        bytes_result.map(|bytes| Transaction {
-            state_update: rlp.val_at(0).unwrap(),
-            transaction_witness: Bytes::from(bytes),
+        let state_update: StateUpdate = rlp.val_at(0)?;
+        let transaction_witness: Vec<u8> = rlp.val_at(1)?;
+        Ok(Transaction {
+            state_update,
+            transaction_witness: Bytes::from(transaction_witness),
         })
     }
 }

@@ -36,15 +36,15 @@ impl Encodable for IncludedTransaction {
 
 impl Decodable for IncludedTransaction {
     fn decode(rlp: &Rlp) -> Result<Self, DecoderError> {
-        let signed_transaction_result: Result<SignedTransaction, DecoderError> = rlp.val_at(0);
-        let proof_result: Result<Vec<u8>, DecoderError> = rlp.val_at(2);
-        signed_transaction_result.and_then(|signed_transaction| {
-            proof_result.map(|proof| IncludedTransaction {
-                signed_transaction,
-                root: rlp.val_at(1).unwrap_or_else(|_| H256::zero()),
-                proof: Bytes::from(proof),
-                index: rlp.val_at(3).unwrap_or(0),
-            })
+        let signed_transaction: SignedTransaction = rlp.val_at(0)?;
+        let root: H256 = rlp.val_at(1)?;
+        let proof: Vec<u8> = rlp.val_at(2)?;
+        let index: u8 = rlp.val_at(3)?;
+        Ok(IncludedTransaction {
+            signed_transaction,
+            root,
+            proof: Bytes::from(proof),
+            index,
         })
     }
 }
