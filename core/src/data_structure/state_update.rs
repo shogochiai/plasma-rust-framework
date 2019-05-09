@@ -44,12 +44,16 @@ impl Encodable for StateUpdate {
 
 impl Decodable for StateUpdate {
     fn decode(rlp: &Rlp) -> Result<Self, DecoderError> {
-        let new_state_result: Result<StateObject, DecoderError> = rlp.val_at(4);
-        new_state_result.map(|new_state| StateUpdate {
-            start: rlp.val_at(0).unwrap_or(0),
-            end: rlp.val_at(1).unwrap_or(0),
-            block: rlp.val_at(2).unwrap_or(0),
-            plasma_contract: rlp.val_at(3).unwrap_or_else(|_| Address::zero()),
+        let start: u64 = rlp.val_at(0)?;
+        let end: u64 = rlp.val_at(1)?;
+        let block: u64 = rlp.val_at(2)?;
+        let plasma_contract: Address = rlp.val_at(3)?;
+        let new_state: StateObject = rlp.val_at(4)?;
+        Ok(StateUpdate {
+            start,
+            end,
+            block,
+            plasma_contract,
             new_state,
         })
     }

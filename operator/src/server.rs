@@ -11,6 +11,7 @@ use super::rpc::plasmarpc::PlasmaRpc;
 use super::rpc::plasmarpcimpl::PlasmaRpcImpl;
 use jsonrpc_http_server::jsonrpc_core::IoHandler;
 use jsonrpc_http_server::{Server, ServerBuilder};
+use std::net::SocketAddr;
 
 /// Options for Plasma JSON RPC server.
 pub struct HttpOption {
@@ -33,10 +34,10 @@ pub fn get_server(options: HttpOption) -> Result<Server, Error> {
     let rpc = PlasmaRpcImpl;
     io.extend_with(rpc.to_delegate());
 
-    options.url.parse().map_err(Into::into).and_then(|url| {
-        ServerBuilder::new(io)
-            .threads(options.threads)
-            .start_http(&url)
-            .map_err(Into::into)
-    })
+    let parsed: Result<SocketAddr, Error> = options.url.parse().map_err(Into::into);
+    let url = parsed?;
+    ServerBuilder::new(io)
+        .threads(options.threads)
+        .start_http(&url)
+        .map_err(Into::into)
 }
