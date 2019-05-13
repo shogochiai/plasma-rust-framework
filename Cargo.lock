@@ -109,13 +109,6 @@ version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "client"
-version = "0.1.0"
-dependencies = [
- "plasma-core 0.1.0",
-]
-
-[[package]]
 name = "clippy"
 version = "0.0.302"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -627,6 +620,14 @@ version = "0.1.0"
 dependencies = [
  "clippy 0.0.302 (registry+https://github.com/rust-lang/crates.io-index)",
  "plasma-operator 0.1.0",
+]
+
+[[package]]
+name = "plasma-client"
+version = "0.1.0"
+dependencies = [
+ "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "plasma-core 0.1.0",
 ]
 
 [[package]]

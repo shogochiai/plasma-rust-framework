@@ -1,4 +1,8 @@
-pub trait Storage<T, E> {
-  fn get(key: String) -> String;
-  fn set(key: String, value: String) -> Result<T, E>;
+use super::error::Error;
+
+// TODO: implement custom result type
+pub trait Storage {
+    fn get(&self, key: &str) -> Result<Option<String>, Error>;
+    fn set(&self, key: &str, value: &str) -> Result<(), Error>;
+    fn delete(&self, key: &str) -> Result<(), Error>;
 }
