@@ -1,24 +1,25 @@
 extern crate ethereum_types;
 extern crate rlp;
 
-use super::signed_transaction::SignedTransaction;
+use super::transaction::Transaction;
 use bytes::Bytes;
 use ethereum_types::H256;
 use rlp::{Decodable, DecoderError, Encodable, Rlp, RlpStream};
 
+#[derive(Clone, Debug)]
 pub struct IncludedTransaction {
-    signed_transaction: SignedTransaction,
+    transaction: Transaction,
     root: H256,
-    proof: Bytes,
+    proof: Vec<u8>,
     index: u8,
 }
 
 impl IncludedTransaction {
-    pub fn new(signed_transaction: SignedTransaction, root: H256, proof: Bytes, index: u8) -> Self {
+    pub fn new(transaction: Transaction, root: H256, proof: &Bytes, index: u8) -> Self {
         IncludedTransaction {
-            signed_transaction,
+            transaction,
             root,
-            proof,
+            proof: proof.to_vec(),
             index,
         }
     }
@@ -27,23 +28,23 @@ impl IncludedTransaction {
 impl Encodable for IncludedTransaction {
     fn rlp_append(&self, s: &mut RlpStream) {
         s.begin_list(4);
-        s.append(&self.signed_transaction);
+        s.append(&self.transaction);
         s.append(&self.root);
-        s.append(&self.proof.as_ref());
+        s.append(&self.proof);
         s.append(&self.index);
     }
 }
 
 impl Decodable for IncludedTransaction {
     fn decode(rlp: &Rlp) -> Result<Self, DecoderError> {
-        let signed_transaction: SignedTransaction = rlp.val_at(0)?;
+        let transaction: Transaction = rlp.val_at(0)?;
         let root: H256 = rlp.val_at(1)?;
         let proof: Vec<u8> = rlp.val_at(2)?;
         let index: u8 = rlp.val_at(3)?;
         Ok(IncludedTransaction {
-            signed_transaction,
+            transaction,
             root,
-            proof: Bytes::from(proof),
+            proof,
             index,
         })
     }
@@ -52,16 +53,22 @@ impl Decodable for IncludedTransaction {
 #[cfg(test)]
 mod tests {
     use super::IncludedTransaction;
-    use super::H256;
-    use crate::data_structure::signed_transaction::SignedTransaction;
+    use crate::data_structure::state_object::StateObject;
+    use crate::data_structure::state_update::StateUpdate;
+    use crate::data_structure::transaction::Transaction;
     use bytes::Bytes;
+    use ethereum_types::{Address, H256};
 
     #[test]
     fn test_rlp_encode() {
+        let message_bytes = Bytes::from(&b"parameters"[..]);
+        let state_object = StateObject::new(Address::zero(), &message_bytes);
+        let state_update = StateUpdate::new(0, 0, 0, Address::zero(), state_object);
+
         let proof_bytes = Bytes::from(&b"proof"[..]);
-        let signed_transaction = SignedTransaction::new(&[]);
+        let transaction = Transaction::new(state_update, &message_bytes);
         let included_transaction =
-            IncludedTransaction::new(signed_transaction, H256::zero(), proof_bytes, 0);
+            IncludedTransaction::new(transaction, H256::zero(), &proof_bytes, 0);
         let encoded = rlp::encode(&included_transaction);
         let _decoded: IncludedTransaction = rlp::decode(&encoded).unwrap();
         assert_eq!(_decoded.root, included_transaction.root);
