@@ -1,20 +1,20 @@
 extern crate ethereum_types;
 extern crate rlp;
 
-use super::signed_transaction::SignedTransaction;
+use super::transaction::Transaction;
 use ethereum_types::H256;
 use rlp::{Decodable, DecoderError, Encodable, Rlp, RlpStream};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Block {
-    signed_transactions: Vec<SignedTransaction>,
+    transactions: Vec<Transaction>,
     root: H256,
 }
 
 impl Block {
-    pub fn new(signed_transactions: &[SignedTransaction], root: H256) -> Block {
+    pub fn new(transactions: &[Transaction], root: H256) -> Block {
         Block {
-            signed_transactions: signed_transactions.to_vec(),
+            transactions: transactions.to_vec(),
             root,
         }
     }
@@ -23,19 +23,16 @@ impl Block {
 impl Encodable for Block {
     fn rlp_append(&self, s: &mut RlpStream) {
         s.begin_list(2);
-        s.append_list(&self.signed_transactions);
+        s.append_list(&self.transactions);
         s.append(&self.root);
     }
 }
 
 impl Decodable for Block {
     fn decode(rlp: &Rlp) -> Result<Self, DecoderError> {
-        let signed_transactions: Vec<SignedTransaction> = rlp.list_at(0)?;
+        let transactions: Vec<Transaction> = rlp.list_at(0)?;
         let root: H256 = rlp.val_at(1)?;
-        Ok(Block {
-            signed_transactions,
-            root,
-        })
+        Ok(Block { transactions, root })
     }
 }
 

@@ -5,17 +5,17 @@ use bytes::Bytes;
 use ethereum_types::Address;
 use rlp::{Decodable, DecoderError, Encodable, Rlp, RlpStream};
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct StateObject {
     predicate: Address,
-    parameters: Bytes,
+    parameters: Vec<u8>,
 }
 
 impl StateObject {
-    pub fn new(predicate: Address, parameters: Bytes) -> StateObject {
+    pub fn new(predicate: Address, parameters: &Bytes) -> StateObject {
         StateObject {
             predicate,
-            parameters,
+            parameters: parameters.to_vec(),
         }
     }
 }
@@ -24,7 +24,7 @@ impl Encodable for StateObject {
     fn rlp_append(&self, s: &mut RlpStream) {
         s.begin_list(2);
         s.append(&self.predicate);
-        s.append(&self.parameters.as_ref());
+        s.append(&self.parameters);
     }
 }
 
@@ -34,7 +34,7 @@ impl Decodable for StateObject {
         let parameters: Vec<u8> = rlp.val_at(1)?;
         Ok(StateObject {
             predicate,
-            parameters: Bytes::from(parameters),
+            parameters,
         })
     }
 }
@@ -49,7 +49,7 @@ mod tests {
     #[test]
     fn test_rlp_encode() {
         let parameters_bytes = Bytes::from(&b"parameters"[..]);
-        let _state_object = StateObject::new(Address::zero(), parameters_bytes);
+        let _state_object = StateObject::new(Address::zero(), &parameters_bytes);
         let encoded = rlp::encode(&_state_object);
         let _decoded: StateObject = rlp::decode(&encoded).unwrap();
         assert_eq!(_decoded.predicate, _state_object.predicate);

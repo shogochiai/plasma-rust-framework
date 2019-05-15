@@ -5,7 +5,7 @@ use super::state_object::StateObject;
 use ethereum_types::Address;
 use rlp::{Decodable, DecoderError, Encodable, Rlp, RlpStream};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct StateUpdate {
     start: u64,
     end: u64,
@@ -71,7 +71,7 @@ mod tests {
     #[test]
     fn test_rlp_encode() {
         let message_bytes = Bytes::from(&b"parameters"[..]);
-        let state_object = StateObject::new(Address::zero(), message_bytes);
+        let state_object = StateObject::new(Address::zero(), &message_bytes);
         let state_update = StateUpdate::new(0, 0, 0, Address::zero(), state_object);
         let encoded = rlp::encode(&state_update);
         let _decoded: StateUpdate = rlp::decode(&encoded).unwrap();
