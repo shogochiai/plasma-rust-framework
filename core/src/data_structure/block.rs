@@ -5,15 +5,16 @@ use super::signed_transaction::SignedTransaction;
 use ethereum_types::H256;
 use rlp::{Decodable, DecoderError, Encodable, Rlp, RlpStream};
 
+#[derive(Clone)]
 pub struct Block {
     signed_transactions: Vec<SignedTransaction>,
     root: H256,
 }
 
 impl Block {
-    pub fn new(signed_transactions: Vec<SignedTransaction>, root: H256) -> Block {
+    pub fn new(signed_transactions: &[SignedTransaction], root: H256) -> Block {
         Block {
-            signed_transactions,
+            signed_transactions: signed_transactions.to_vec(),
             root,
         }
     }
@@ -45,13 +46,13 @@ mod tests {
 
     #[test]
     fn test_new() {
-        let block = Block::new(vec![], H256::zero());
+        let block = Block::new(&[], H256::zero());
         assert_eq!(block.root, H256::zero());
     }
 
     #[test]
     fn test_rlp_encode() {
-        let block = Block::new(vec![], H256::zero());
+        let block = Block::new(&[], H256::zero());
         let encoded = rlp::encode(&block);
         let _decoded: Block = rlp::decode(&encoded).unwrap();
         assert_eq!(_decoded.root, block.root);

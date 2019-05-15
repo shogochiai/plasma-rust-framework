@@ -59,9 +59,7 @@ mod tests {
     #[test]
     fn test_rlp_encode() {
         let proof_bytes = Bytes::from(&b"proof"[..]);
-        let signed_transaction = SignedTransaction {
-            transactions: vec![],
-        };
+        let signed_transaction = SignedTransaction::new(&[]);
         let included_transaction =
             IncludedTransaction::new(signed_transaction, H256::zero(), proof_bytes, 0);
         let encoded = rlp::encode(&included_transaction);

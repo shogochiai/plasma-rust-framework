@@ -1,4 +1,5 @@
 pub mod block;
+pub mod error;
 mod included_transaction;
 pub mod signed_transaction;
 mod state_object;
