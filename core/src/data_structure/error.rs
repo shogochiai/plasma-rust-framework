@@ -15,6 +15,8 @@ use std::io::Error as IoError;
 pub enum ErrorKind {
     #[fail(display = "IO error")]
     Io,
+    #[fail(display = "no transactions")]
+    NoTransactions,
 }
 
 #[derive(Debug)]

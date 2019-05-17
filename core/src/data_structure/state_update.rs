@@ -30,6 +30,12 @@ impl StateUpdate {
             new_state,
         }
     }
+    pub fn get_start(&self) -> u64 {
+        self.start
+    }
+    pub fn get_end(&self) -> u64 {
+        self.end
+    }
 }
 
 impl Encodable for StateUpdate {

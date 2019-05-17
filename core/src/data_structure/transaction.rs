@@ -18,6 +18,12 @@ impl Transaction {
             transaction_witness: transaction_witness.to_vec(),
         }
     }
+    pub fn get_start(&self) -> u64 {
+        self.state_update.get_start()
+    }
+    pub fn get_end(&self) -> u64 {
+        self.state_update.get_end()
+    }
 }
 
 impl Encodable for Transaction {

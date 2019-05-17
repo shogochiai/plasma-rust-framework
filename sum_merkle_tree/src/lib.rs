@@ -2,7 +2,6 @@ extern crate crypto;
 
 use self::crypto::sha3::Sha3;
 use byteorder::{LittleEndian, WriteBytesExt};
-use bytes::Bytes;
 use crypto::digest::Digest;
 
 #[derive(Debug)]
@@ -10,17 +9,21 @@ pub enum Error {
     VerifyError,
 }
 
-fn hash_leaf(value: &Bytes) -> Bytes {
+fn hash_leaf(value: &[u8]) -> Vec<u8> {
     let mut hasher = Sha3::keccak256();
     let mut result = vec![0u8; hasher.output_bits() / 8];
     hasher.reset();
-    hasher.input(value.as_ref());
+    hasher.input(value);
     hasher.result(result.as_mut_slice());
-    Bytes::from(result)
+    result
+}
+
+fn empty_hash() -> Vec<u8> {
+    hash_leaf(&[0u8]).to_vec()
 }
 
 trait Hashable {
-    fn hash(&self) -> Bytes;
+    fn hash(&self) -> Vec<u8>;
 }
 
 /// SumMerkleNode is a node in merkle tree
@@ -47,7 +50,7 @@ trait Hashable {
 pub enum SumMerkleNode {
     Leaf {
         end: u64,
-        data: Bytes,
+        data: Vec<u8>,
     },
 
     Node {
@@ -58,28 +61,26 @@ pub enum SumMerkleNode {
 
     ProofNode {
         end: u64,
-        data: Bytes,
+        data: Vec<u8>,
     },
 }
 
 /// Caluculate hash of a node
-fn compute_node(end: u64, data: &Bytes) -> Bytes {
+fn compute_node(end: u64, data: &[u8]) -> Vec<u8> {
     let mut end_writer = vec![];
     end_writer.write_u64::<LittleEndian>(end).unwrap();
-    let mut buf = Bytes::new();
-    buf.extend_from_slice(&end_writer);
-    buf.extend_from_slice(&data);
-    hash_leaf(&buf)
+    end_writer.append(&mut Vec::from(data));
+    hash_leaf(&end_writer).to_vec()
 }
 
 impl Hashable for SumMerkleNode {
-    fn hash(&self) -> Bytes {
+    fn hash(&self) -> Vec<u8> {
         match self {
             SumMerkleNode::Leaf { data, .. } => hash_leaf(data),
             // H(H(left.end + left.data) + H(right.end + right.data))
             SumMerkleNode::Node { left, right, .. } => {
                 let mut buf = compute_node(left.get_end(), &left.hash());
-                buf.extend_from_slice(&compute_node(right.get_end(), &right.hash()));
+                buf.append(&mut compute_node(right.get_end(), &right.hash()));
                 hash_leaf(&buf)
             }
             SumMerkleNode::ProofNode { data, .. } => data.clone(),
@@ -91,19 +92,29 @@ impl SumMerkleNode {
     pub fn create_proof_node(node: &SumMerkleNode) -> SumMerkleNode {
         SumMerkleNode::ProofNode {
             end: node.get_end(),
-            data: node.hash(),
+            data: node.hash().to_vec(),
         }
     }
 
     pub fn create_empty() -> Self {
         SumMerkleNode::Leaf {
             end: u64::max_value(),
-            data: hash_leaf(&Bytes::from_static(&[0u8])),
+            data: empty_hash(),
         }
     }
 
-    pub fn create_leaf(end: u64, data: Bytes) -> Self {
-        SumMerkleNode::Leaf { end, data }
+    pub fn create_empty_leaf(end: u64) -> Self {
+        SumMerkleNode::Leaf {
+            end,
+            data: empty_hash(),
+        }
+    }
+
+    pub fn create_leaf(end: u64, data: &[u8]) -> Self {
+        SumMerkleNode::Leaf {
+            end,
+            data: data.to_vec(),
+        }
     }
 
     pub fn create_node(end: u64, left: &SumMerkleNode, right: &SumMerkleNode) -> Self {
@@ -171,7 +182,7 @@ impl SumMerkleTree {
     }
 
     /// Calculate merkle root
-    pub fn get_root(&self) -> Bytes {
+    pub fn get_root(&self) -> Vec<u8> {
         self.tree.hash()
     }
 
@@ -252,7 +263,7 @@ impl SumMerkleTree {
         leaf: &SumMerkleNode,
         idx: usize,
         inclusion_proof: Vec<SumMerkleNode>,
-        root: &Bytes,
+        root: &[u8],
     ) -> Result<ImplicitBounds, Error> {
         let mut path: Vec<bool> = vec![];
         Self::get_path(idx, inclusion_proof.len(), path.as_mut());
@@ -290,18 +301,17 @@ impl SumMerkleTree {
 
 #[cfg(test)]
 mod tests {
-    use super::Bytes;
     use super::SumMerkleNode;
     use super::SumMerkleTree;
 
     #[test]
     fn test_compute_parent() {
-        let hash_message1 = Bytes::from(&b"message"[..]);
+        let hash_message1 = Vec::from(&b"message"[..]);
         let leaf1 = SumMerkleNode::Leaf {
             end: 100,
             data: hash_message1,
         };
-        let hash_message2 = Bytes::from(&b"message"[..]);
+        let hash_message2 = Vec::from(&b"message"[..]);
         let leaf2 = SumMerkleNode::Leaf {
             end: 200,
             data: hash_message2,
@@ -312,12 +322,12 @@ mod tests {
 
     #[test]
     fn test_generate_tree() {
-        let hash_message1 = Bytes::from(&b"message"[..]);
+        let hash_message1 = Vec::from(&b"message"[..]);
         let leaf1 = SumMerkleNode::Leaf {
             end: 100,
             data: hash_message1,
         };
-        let hash_message2 = Bytes::from(&b"message"[..]);
+        let hash_message2 = Vec::from(&b"message"[..]);
         let leaf2 = SumMerkleNode::Leaf {
             end: 200,
             data: hash_message2,
@@ -328,12 +338,12 @@ mod tests {
 
     #[test]
     fn test_proof() {
-        let hash_message1 = Bytes::from(&b"message"[..]);
+        let hash_message1 = Vec::from(&b"message"[..]);
         let leaf1 = SumMerkleNode::Leaf {
             end: 100,
             data: hash_message1,
         };
-        let hash_message2 = Bytes::from(&b"message"[..]);
+        let hash_message2 = Vec::from(&b"message"[..]);
         let leaf2 = SumMerkleNode::Leaf {
             end: 200,
             data: hash_message2,
@@ -353,7 +363,7 @@ mod tests {
         for i in 0..100 {
             leaves.push(SumMerkleNode::Leaf {
                 end: i * 100 + 100,
-                data: Bytes::from(&b"message"[..]),
+                data: Vec::from(&b"message"[..]),
             })
         }
         let tree = SumMerkleTree::generate(&leaves);
@@ -371,7 +381,7 @@ mod tests {
         for i in 0..100 {
             leaves.push(SumMerkleNode::Leaf {
                 end: i * 100 + 100,
-                data: Bytes::from(&b"message"[..]),
+                data: Vec::from(&b"message"[..]),
             })
         }
         let tree = SumMerkleTree::generate(&leaves);
