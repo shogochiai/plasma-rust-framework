@@ -8,7 +8,11 @@ use sum_merkle_tree::{SumMerkleNode, SumMerkleTree};
 pub struct BlockGenerator {}
 
 impl BlockGenerator {
-    /// Example
+    /// ## Description
+    /// This is the generation logic of Merkle tree as plasma block.
+    /// Add empty leaf between transactions.
+    ///
+    /// ## Example
     /// ```
     /// use plasma_core::process::block_generator::BlockGenerator;
     /// let result = BlockGenerator::generate(&[]);
