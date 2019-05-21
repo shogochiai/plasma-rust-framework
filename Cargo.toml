@@ -16,7 +16,9 @@ members = [
 	"android",
 	"core",
 	"operator",
-	"sum_merkle_tree"
+	"sum_merkle_tree",
+	"db",
+	"utils/range"
 ]
 
 [dependencies]

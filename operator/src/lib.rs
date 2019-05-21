@@ -17,6 +17,7 @@ pub mod error;
 pub mod rpc;
 /// Plasma JSON RPC server.
 pub mod server;
+pub mod state;
 
 use self::server::get_server;
 use env_logger;

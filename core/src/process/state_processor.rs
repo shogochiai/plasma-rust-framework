@@ -1,5 +1,6 @@
-use super::range_manager::{Range, RangeManager};
+use super::range_processor::RangeProcessor;
 use crate::data_structure::transaction::Transaction;
+use plasma_utils_range::Range;
 
 pub struct StateProcessor {}
 
@@ -9,7 +10,7 @@ impl StateProcessor {
         // check transaction witness
         // transaction.get_transaction_witness()
         // call verify_deprecation
-        RangeManager::put(
+        RangeProcessor::put(
             input_ranges,
             transaction.get_start(),
             transaction.get_end(),
