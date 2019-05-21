@@ -39,6 +39,12 @@ impl StateUpdate {
             Token::Address(self.plasma_contract),
         ])
     }
+    pub fn get_start(&self) -> u64 {
+        self.start
+    }
+    pub fn get_end(&self) -> u64 {
+        self.end
+    }
     pub fn from_abi(data: &[u8]) -> Result<Self, ethabi::Error> {
         let decoded: Vec<Token> = ethabi::decode(
             &[

@@ -107,6 +107,15 @@ impl Transaction {
         hasher.finalize(&mut result);
         result[0]
     }
+    pub fn get_start(&self) -> u64 {
+        self.start
+    }
+    pub fn get_end(&self) -> u64 {
+        self.end
+    }
+    pub fn get_transaction_witness(&self) -> &Witness {
+        &self.witness
+    }
 }
 
 impl Encodable for Transaction {
