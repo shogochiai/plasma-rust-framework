@@ -7,3 +7,11 @@ edition = "2018"
 [dependencies]
 failure = "0.1.5"
 plasma-core = { path = "../core" }
+wasm-bindgen = "*"
+
+
+[dependencies.web-sys]
+features = [
+  'Window',
+  'Storage'
+]
