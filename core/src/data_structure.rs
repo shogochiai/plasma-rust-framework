@@ -1,7 +1,7 @@
 pub mod block;
 pub mod error;
 mod included_transaction;
-mod state_object;
+pub mod state_object;
 mod state_update;
 pub mod transaction;
 

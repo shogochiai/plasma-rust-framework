@@ -85,9 +85,9 @@ impl From<AddrParseError> for Error {
 }
 
 impl From<PlasmaCoreError> for Error {
-    fn from(error: PlasmaCoreError) -> Error {
+    fn from(_error: PlasmaCoreError) -> Error {
         Error {
-            inner: error.context(ErrorKind::PlasmaCore),
+            inner: Context::from(ErrorKind::PlasmaCore),
         }
     }
 }
