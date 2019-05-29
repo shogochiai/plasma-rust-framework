@@ -1,88 +1,85 @@
-extern crate ethereum_types;
+extern crate ethabi;
 extern crate rlp;
 
 use super::state_object::StateObject;
+use ethabi::Token;
 use ethereum_types::Address;
-use rlp::{Decodable, DecoderError, Encodable, Rlp, RlpStream};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct StateUpdate {
+    state_object: StateObject,
     start: u64,
     end: u64,
-    block: u64,
+    block_number: u64,
     plasma_contract: Address,
-    new_state: StateObject,
 }
 
 impl StateUpdate {
     pub fn new(
+        state_object: &StateObject,
         start: u64,
         end: u64,
-        block: u64,
+        block_number: u64,
         plasma_contract: Address,
-        new_state: StateObject,
-    ) -> StateUpdate {
+    ) -> Self {
         StateUpdate {
+            state_object: state_object.clone(),
             start,
             end,
-            block,
+            block_number,
             plasma_contract,
-            new_state,
         }
     }
-}
-
-impl Encodable for StateUpdate {
-    fn rlp_append(&self, s: &mut RlpStream) {
-        s.begin_list(5);
-        s.append(&self.start);
-        s.append(&self.end);
-        s.append(&self.block);
-        s.append(&self.plasma_contract);
-        s.append(&self.new_state);
+    pub fn to_abi(&self) -> Vec<u8> {
+        ethabi::encode(&[
+            Token::Bytes(self.state_object.to_abi()),
+            Token::Uint(self.start.into()),
+            Token::Uint(self.end.into()),
+            Token::Uint(self.block_number.into()),
+            Token::Address(self.plasma_contract),
+        ])
     }
-}
-
-impl Decodable for StateUpdate {
-    fn decode(rlp: &Rlp) -> Result<Self, DecoderError> {
-        let start: u64 = rlp.val_at(0)?;
-        let end: u64 = rlp.val_at(1)?;
-        let block: u64 = rlp.val_at(2)?;
-        let plasma_contract: Address = rlp.val_at(3)?;
-        let new_state: StateObject = rlp.val_at(4)?;
-        Ok(StateUpdate {
-            start,
-            end,
-            block,
+    pub fn from_abi(data: &[u8]) -> Result<Self, ethabi::Error> {
+        let decoded: Vec<Token> = ethabi::decode(
+            &[
+                ethabi::ParamType::Bytes,
+                ethabi::ParamType::Uint(8),
+                ethabi::ParamType::Uint(8),
+                ethabi::ParamType::Uint(8),
+                ethabi::ParamType::Address,
+            ],
+            data,
+        )?;
+        let state_object = decoded[0].clone().to_bytes().unwrap();
+        let start = decoded[1].clone().to_uint().unwrap();
+        let end = decoded[2].clone().to_uint().unwrap();
+        let block_number = decoded[3].clone().to_uint().unwrap();
+        let plasma_contract = decoded[4].clone().to_address().unwrap();
+        Ok(StateUpdate::new(
+            &StateObject::from_abi(&state_object).unwrap(),
+            start.as_u64(),
+            end.as_u64(),
+            block_number.as_u64(),
             plasma_contract,
-            new_state,
-        })
+        ))
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::DecoderError;
     use super::StateObject;
     use super::StateUpdate;
-    use bytes::Bytes;
     use ethereum_types::Address;
 
     #[test]
-    fn test_rlp_encode() {
-        let message_bytes = Bytes::from(&b"parameters"[..]);
-        let state_object = StateObject::new(Address::zero(), &message_bytes);
-        let state_update = StateUpdate::new(0, 0, 0, Address::zero(), state_object);
-        let encoded = rlp::encode(&state_update);
-        let _decoded: StateUpdate = rlp::decode(&encoded).unwrap();
-        assert_eq!(_decoded.start, state_update.start);
+    fn test_abi_encode() {
+        let parameters_bytes = Vec::from(&b"parameters"[..]);
+        let state_object = StateObject::new(Address::zero(), &parameters_bytes);
+
+        let state_update = StateUpdate::new(&state_object, 0, 100, 1, Address::zero());
+        let encoded = state_update.to_abi();
+        let decoded: StateUpdate = StateUpdate::from_abi(&encoded).unwrap();
+        assert_eq!(decoded.start, state_update.start);
     }
 
-    #[test]
-    fn fail_to_decode() {
-        let failtodecode = "failtodecode";
-        let encoded = rlp::encode(&failtodecode);
-        let decoded: Result<StateUpdate, DecoderError> = rlp::decode(&encoded);
-        assert_eq!(decoded.is_err(), true);
-    }
 }
