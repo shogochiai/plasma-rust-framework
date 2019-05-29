@@ -1,5 +1,3 @@
-mod utils;
-
 use bytes::Bytes;
 use ethereum_types::Address;
 use plasma_core::data_structure::state_object::StateObject;
