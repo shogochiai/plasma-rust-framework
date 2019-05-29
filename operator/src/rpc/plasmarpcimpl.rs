@@ -53,7 +53,7 @@ impl PlasmaRpc for PlasmaRpcImpl {
 mod tests {
     use super::PlasmaRpc;
     use super::PlasmaRpcImpl;
-    use ethereum_types::Address;
+    use ethereum_types::{Address, H256};
     use jsonrpc_http_server::jsonrpc_core::IoHandler;
     use plasma_core::data_structure::{Transaction, Witness};
 
@@ -82,9 +82,9 @@ mod tests {
             Address::zero(),
             0,
             100,
-            &Transaction::create_method_id(&b"send(address)"[..]),
+            Transaction::create_method_id(&b"send(address)"[..]),
             &parameters_bytes,
-            &Witness::new(&parameters_bytes, &parameters_bytes, 0),
+            &Witness::new(H256::zero(), H256::zero(), 0),
         );
         let encoded = transaction.to_abi();
 

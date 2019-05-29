@@ -3,7 +3,7 @@ extern crate rlp;
 extern crate tiny_keccak;
 
 use ethabi::Token;
-use ethereum_types::Address;
+use ethereum_types::{Address, H256};
 use rlp::{Decodable, DecoderError, Encodable, Rlp, RlpStream};
 use tiny_keccak::Keccak;
 
@@ -14,18 +14,14 @@ pub enum Error {
 
 #[derive(Clone, Debug)]
 pub struct Witness {
-    v: Vec<u8>,
-    r: Vec<u8>,
+    v: H256,
+    r: H256,
     s: u64,
 }
 
 impl Witness {
-    pub fn new(v: &[u8], r: &[u8], s: u64) -> Self {
-        Witness {
-            v: v.to_vec(),
-            r: r.to_vec(),
-            s,
-        }
+    pub fn new(v: H256, r: H256, s: u64) -> Self {
+        Witness { v, r, s }
     }
 }
 
@@ -34,7 +30,7 @@ pub struct Transaction {
     plasma_contract_address: Address,
     start: u64,
     end: u64,
-    method_id: Vec<u8>,
+    method_id: u8,
     parameters: Vec<u8>,
     witness: Witness,
 }
@@ -44,7 +40,7 @@ impl Transaction {
         plasma_contract_address: Address,
         start: u64,
         end: u64,
-        method_id: &[u8],
+        method_id: u8,
         parameters: &[u8],
         witness: &Witness,
     ) -> Transaction {
@@ -52,7 +48,7 @@ impl Transaction {
             plasma_contract_address,
             start,
             end,
-            method_id: method_id.to_vec(),
+            method_id,
             parameters: parameters.to_vec(),
             witness: witness.clone(),
         }
@@ -62,7 +58,7 @@ impl Transaction {
             Token::Address(self.plasma_contract_address),
             Token::Uint(self.start.into()),
             Token::Uint(self.end.into()),
-            Token::FixedBytes(self.method_id.clone()),
+            Token::FixedBytes(vec![self.method_id]),
             Token::Bytes(self.parameters.clone()),
         ])
     }
@@ -71,10 +67,10 @@ impl Transaction {
             Token::Address(self.plasma_contract_address),
             Token::Uint(self.start.into()),
             Token::Uint(self.end.into()),
-            Token::FixedBytes(self.method_id.clone()),
+            Token::FixedBytes(vec![self.method_id]),
             Token::Bytes(self.parameters.clone()),
-            Token::FixedBytes(self.witness.v.clone()),
-            Token::FixedBytes(self.witness.r.clone()),
+            Token::FixedBytes(self.witness.v.as_bytes().to_vec()),
+            Token::FixedBytes(self.witness.r.as_bytes().to_vec()),
             Token::Uint(self.witness.s.into()),
         ])
     }
@@ -99,17 +95,17 @@ impl Transaction {
             decoded[0].clone().to_address().unwrap(),
             decoded[1].clone().to_uint().unwrap().as_u64(),
             decoded[2].clone().to_uint().unwrap().as_u64(),
-            &decoded[3].clone().to_fixed_bytes().unwrap(),
+            decoded[3].clone().to_fixed_bytes().unwrap()[0],
             &decoded[4].clone().to_bytes().unwrap(),
-            &Witness::new(&v, &r, s),
+            &Witness::new(H256::from_slice(&v), H256::from_slice(&r), s),
         ))
     }
-    pub fn create_method_id(value: &[u8]) -> Vec<u8> {
+    pub fn create_method_id(value: &[u8]) -> u8 {
         let mut hasher = Keccak::new_sha3_256();
         hasher.update(value);
         let mut result: [u8; 32] = [0; 32];
         hasher.finalize(&mut result);
-        result.to_vec()
+        result[0]
     }
 }
 
@@ -131,7 +127,7 @@ impl Decodable for Transaction {
 mod tests {
     use super::Transaction;
     use super::Witness;
-    use ethereum_types::Address;
+    use ethereum_types::{Address, H256};
 
     #[test]
     fn test_abi_encode() {
@@ -140,9 +136,9 @@ mod tests {
             Address::zero(),
             0,
             100,
-            &Transaction::create_method_id(&b"send(address)"[..]),
+            Transaction::create_method_id(&b"send(address)"[..]),
             &parameters_bytes,
-            &Witness::new(&parameters_bytes, &parameters_bytes, 0),
+            &Witness::new(H256::zero(), H256::zero(), 0),
         );
         let encoded = transaction.to_abi();
         let decoded: Transaction = Transaction::from_abi(&encoded).unwrap();
