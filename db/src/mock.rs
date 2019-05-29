@@ -8,7 +8,7 @@ pub struct MockRangeDatabase {
 
 impl Default for MockRangeDatabase {
     fn default() -> Self {
-        MockRangeDatabase { ranges: vec![] }
+        Self { ranges: vec![] }
     }
 }
 
