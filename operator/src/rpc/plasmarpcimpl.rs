@@ -55,7 +55,7 @@ mod tests {
     use super::PlasmaRpcImpl;
     use ethereum_types::Address;
     use jsonrpc_http_server::jsonrpc_core::IoHandler;
-    use plasma_core::data_structure::Transaction;
+    use plasma_core::data_structure::{Transaction, Witness};
 
     #[test]
     fn test_protocol_version() {
@@ -81,10 +81,10 @@ mod tests {
         let transaction = Transaction::new(
             Address::zero(),
             0,
-            0,
             100,
             &Transaction::create_method_id(&b"send(address)"[..]),
             &parameters_bytes,
+            &Witness::new(&parameters_bytes, &parameters_bytes, 0),
         );
         let encoded = transaction.to_abi();
 

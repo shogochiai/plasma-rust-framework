@@ -19,11 +19,7 @@ pub unsafe extern "C" fn Java_com_example_android_MainActivity_hello(
     ));
 
     let parameters_bytes = Vec::from(&b"parameters"[..]);
-    let state_object = StateObject::from_range(
-        0,
-        100,
-        Address::zero(),
-        &parameters_bytes);
+    let state_object = StateObject::new(Address::zero(), &parameters_bytes);
     let _encoded = state_object.to_abi();
 
     let output = env
