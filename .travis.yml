@@ -1,8 +1,6 @@
 language: rust
 cache:
   cargo: true
-  directories:
-    - $HOME/.NDK
   timeout: 300
 stages:
   - tests
