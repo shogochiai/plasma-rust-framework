@@ -10,3 +10,12 @@ ethabi = "7.0.0"
 ethereum-types = "^0.5.2"
 rlp = "0.4.0"
 tiny-keccak = "1.4.2"
+
+[dependencies.plasma-db]
+path = "../db"
+optional = true
+
+[features]
+default = ["linux"]
+linux = ["plasma-db"]
+android = ["plasma-db"]

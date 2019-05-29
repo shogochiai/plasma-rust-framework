@@ -4,6 +4,7 @@ use crate::data_structure::block::Block;
 use crate::data_structure::error::Error;
 use crate::data_structure::transaction::Transaction;
 use ethereum_types::H256;
+use plasma_db::impls::kvs::CoreDb;
 
 pub struct BlockGenerator {}
 

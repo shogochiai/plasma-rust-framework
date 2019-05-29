@@ -1,0 +1,16 @@
+[package]
+name = "plasma-db"
+version = "0.1.0"
+authors = ["Cryptoeconomics Lab <info@cryptoeconomicslab.com>"]
+edition = "2018"
+
+[dependencies]
+tempdir = "0.3.7"
+
+[dependencies.kvdb-rocksdb]
+version = "0.1.4"
+optional = true
+
+[features]
+linux = ["kvdb-rocksdb"]
+android = ["kvdb-rocksdb"]
