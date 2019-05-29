@@ -1,10 +1,10 @@
 language: rust
 cache:
   cargo: true
-  timeout: 300
 stages:
   - tests
-  - deploy
+  - name: deploy
+    if: branch = master
 jobs:
   include:
     - stage: tests
