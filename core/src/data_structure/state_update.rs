@@ -1,6 +1,7 @@
 extern crate ethabi;
 extern crate rlp;
 
+use super::error::Error;
 use super::state_object::StateObject;
 use ethabi::Token;
 use ethereum_types::Address;
@@ -39,7 +40,7 @@ impl StateUpdate {
             Token::Address(self.plasma_contract),
         ])
     }
-    pub fn from_abi(data: &[u8]) -> Result<Self, ethabi::Error> {
+    pub fn from_abi(data: &[u8]) -> Result<Self, Error> {
         let decoded: Vec<Token> = ethabi::decode(
             &[
                 ethabi::ParamType::Bytes,
@@ -49,19 +50,32 @@ impl StateUpdate {
                 ethabi::ParamType::Address,
             ],
             data,
-        )?;
-        let state_object = decoded[0].clone().to_bytes().unwrap();
-        let start = decoded[1].clone().to_uint().unwrap();
-        let end = decoded[2].clone().to_uint().unwrap();
-        let block_number = decoded[3].clone().to_uint().unwrap();
-        let plasma_contract = decoded[4].clone().to_address().unwrap();
-        Ok(StateUpdate::new(
-            &StateObject::from_abi(&state_object).unwrap(),
-            start.as_u64(),
-            end.as_u64(),
-            block_number.as_u64(),
-            plasma_contract,
-        ))
+        )
+        .map_err(|_e| Error::DecodeError)?;
+        let state_object = decoded[0].clone().to_bytes();
+        let start = decoded[1].clone().to_uint();
+        let end = decoded[2].clone().to_uint();
+        let block_number = decoded[3].clone().to_uint();
+        let plasma_contract = decoded[4].clone().to_address();
+
+        if let (
+            Some(state_object),
+            Some(start),
+            Some(end),
+            Some(block_number),
+            Some(plasma_contract),
+        ) = (state_object, start, end, block_number, plasma_contract)
+        {
+            Ok(StateUpdate::new(
+                &StateObject::from_abi(&state_object).unwrap(),
+                start.as_u64(),
+                end.as_u64(),
+                block_number.as_u64(),
+                plasma_contract,
+            ))
+        } else {
+            Err(Error::DecodeError)
+        }
     }
 }
 

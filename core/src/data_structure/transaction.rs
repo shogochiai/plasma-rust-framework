@@ -2,15 +2,11 @@ extern crate ethereum_types;
 extern crate rlp;
 extern crate tiny_keccak;
 
+use super::error::Error;
 use ethabi::Token;
 use ethereum_types::{Address, H256};
 use rlp::{Decodable, DecoderError, Encodable, Rlp, RlpStream};
 use tiny_keccak::Keccak;
-
-#[derive(Debug)]
-pub enum Error {
-    VerifyError,
-}
 
 #[derive(Clone, Debug)]
 pub struct Witness {
@@ -74,7 +70,7 @@ impl Transaction {
             Token::Uint(self.witness.s.into()),
         ])
     }
-    pub fn from_abi(data: &[u8]) -> Result<Self, ethabi::Error> {
+    pub fn from_abi(data: &[u8]) -> Result<Self, Error> {
         let decoded = ethabi::decode(
             &[
                 ethabi::ParamType::Address,
@@ -87,18 +83,46 @@ impl Transaction {
                 ethabi::ParamType::Uint(1),
             ],
             data,
-        )?;
-        let v = &decoded[5].clone().to_fixed_bytes().unwrap();
-        let r = &decoded[6].clone().to_fixed_bytes().unwrap();
-        let s = decoded[7].clone().to_uint().unwrap().as_u64();
-        Ok(Transaction::new(
-            decoded[0].clone().to_address().unwrap(),
-            decoded[1].clone().to_uint().unwrap().as_u64(),
-            decoded[2].clone().to_uint().unwrap().as_u64(),
-            decoded[3].clone().to_fixed_bytes().unwrap()[0],
-            &decoded[4].clone().to_bytes().unwrap(),
-            &Witness::new(H256::from_slice(&v), H256::from_slice(&r), s),
-        ))
+        )
+        .map_err(|_e| Error::DecodeError)?;
+        let plasma_contract = decoded[0].clone().to_address();
+        let start = decoded[1].clone().to_uint();
+        let end = decoded[2].clone().to_uint();
+        let method_id_opt = decoded[3].clone().to_fixed_bytes();
+        let parameters = decoded[4].clone().to_bytes();
+        let v = decoded[5].clone().to_fixed_bytes();
+        let r = decoded[6].clone().to_fixed_bytes();
+        let s = decoded[7].clone().to_uint();
+        if let (
+            Some(plasma_contract),
+            Some(start),
+            Some(end),
+            Some(method_id),
+            Some(parameters),
+            Some(v),
+            Some(r),
+            Some(s),
+        ) = (
+            plasma_contract,
+            start,
+            end,
+            method_id_opt,
+            parameters,
+            v,
+            r,
+            s,
+        ) {
+            Ok(Transaction::new(
+                plasma_contract,
+                start.as_u64(),
+                end.as_u64(),
+                method_id[0],
+                &parameters,
+                &Witness::new(H256::from_slice(&v), H256::from_slice(&r), s.as_u64()),
+            ))
+        } else {
+            Err(Error::DecodeError)
+        }
     }
     pub fn create_method_id(value: &[u8]) -> u8 {
         let mut hasher = Keccak::new_sha3_256();
