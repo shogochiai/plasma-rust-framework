@@ -1,7 +1,7 @@
 extern crate ethabi;
 extern crate rlp;
 
-use super::error::Error;
+use super::error::{Error, ErrorKind};
 use super::state_object::StateObject;
 use ethabi::Token;
 use ethereum_types::Address;
@@ -51,7 +51,7 @@ impl StateUpdate {
             ],
             data,
         )
-        .map_err(|_e| Error::DecodeError)?;
+        .map_err(|_e| Error::from(ErrorKind::AbiDecode))?;
         let state_object = decoded[0].clone().to_bytes();
         let start = decoded[1].clone().to_uint();
         let end = decoded[2].clone().to_uint();
@@ -74,7 +74,7 @@ impl StateUpdate {
                 plasma_contract,
             ))
         } else {
-            Err(Error::DecodeError)
+            Err(Error::from(ErrorKind::AbiDecode))
         }
     }
 }

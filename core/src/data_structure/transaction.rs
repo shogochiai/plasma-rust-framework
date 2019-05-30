@@ -2,7 +2,7 @@ extern crate ethereum_types;
 extern crate rlp;
 extern crate tiny_keccak;
 
-use super::error::Error;
+use super::error::{Error, ErrorKind};
 use ethabi::Token;
 use ethereum_types::{Address, H256};
 use rlp::{Decodable, DecoderError, Encodable, Rlp, RlpStream};
@@ -84,7 +84,7 @@ impl Transaction {
             ],
             data,
         )
-        .map_err(|_e| Error::DecodeError)?;
+        .map_err(|_e| Error::from(ErrorKind::AbiDecode))?;
         let plasma_contract = decoded[0].clone().to_address();
         let start = decoded[1].clone().to_uint();
         let end = decoded[2].clone().to_uint();
@@ -121,7 +121,7 @@ impl Transaction {
                 &Witness::new(H256::from_slice(&v), H256::from_slice(&r), s.as_u64()),
             ))
         } else {
-            Err(Error::DecodeError)
+            Err(Error::from(ErrorKind::AbiDecode))
         }
     }
     pub fn create_method_id(value: &[u8]) -> u8 {

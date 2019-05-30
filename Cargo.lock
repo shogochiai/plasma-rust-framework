@@ -769,6 +769,7 @@ dependencies = [
  "bytes 0.4.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "ethabi 7.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "ethereum-types 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "rlp 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "tiny-keccak 1.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -800,7 +801,6 @@ version = "0.1.0"
 dependencies = [
  "ethereum-types 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "jni 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "plasma-core 0.1.0",
  "rlp 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
