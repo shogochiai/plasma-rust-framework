@@ -647,6 +647,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "kvdb-memorydb"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "kvdb 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "parking_lot 0.6.4 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "kvdb-rocksdb"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -934,7 +943,10 @@ dependencies = [
 name = "plasma-db"
 version = "0.1.0"
 dependencies = [
+ "kvdb 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "kvdb-memorydb 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "kvdb-rocksdb 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rlp 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "tempdir 0.3.7 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -1860,6 +1872,7 @@ dependencies = [
 "checksum jsonrpc-server-utils 11.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "e3372b3248a53abcca8f61924f188052bb0c4cd80b482b2b4eaf9f8667efb9f4"
 "checksum kernel32-sys 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "7507624b29483431c0ba2d82aece8ca6cdba9382bff4ddd0f7490560c056098d"
 "checksum kvdb 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "72ae89206cea31c32014b39d5a454b96135894221610dbfd19cf4d2d044fa546"
+"checksum kvdb-memorydb 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "45bcdf5eb083602cff61a6f8438dce2a7900d714e893fc48781c39fb119d37aa"
 "checksum kvdb-rocksdb 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)" = "06cf755dc587839ba34d3cbe3f12b6ad55850fbcdfe67336157a021a1a5c43ae"
 "checksum lazy_static 1.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "bc5729f27f159ddd61f4df6228e827e86643d4d3e7c32183cb30a1c08f604a14"
 "checksum libc 0.2.55 (registry+https://github.com/rust-lang/crates.io-index)" = "42914d39aad277d9e176efbdad68acb1d5443ab65afe0e0e4f0d49352a950880"

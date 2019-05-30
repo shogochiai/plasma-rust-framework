@@ -5,14 +5,15 @@ use kvdb::{DBTransaction, KeyValueDB};
 use kvdb_memorydb::InMemory;
 #[cfg(any(linux, android))]
 use kvdb_rocksdb::Database;
+use crate::range::Range;
 
 #[cfg(any(linux, android))]
-pub struct CoreDb {
+pub struct RangeDb {
     db: Database,
 }
 
 #[cfg(any(linux, android))]
-impl DatabaseTrait for CoreDb {
+impl DatabaseTrait for RangeDb {
     fn open(_dbname: &str) -> Self {
         Self {
             db: Database::open_default(_dbname).unwrap(),
@@ -22,14 +23,14 @@ impl DatabaseTrait for CoreDb {
 
 /// test
 #[cfg(all(not(linux), not(android)))]
-pub struct CoreDb {
+pub struct RangeDb {
     db: InMemory,
 }
 
 #[cfg(all(not(linux), not(android)))]
-impl DatabaseTrait for CoreDb {
+impl DatabaseTrait for RangeDb {
     fn open(_dbname: &str) -> Self {
-        CoreDb {
+        RangeDb {
             db: Default::default(),
         }
     }
@@ -37,7 +38,24 @@ impl DatabaseTrait for CoreDb {
 }
 
 #[cfg(all(not(linux), not(android)))]
-impl KeyValueStore for CoreDb {
+impl KeyValueStore for RangeDb {
+    fn get(&self, start: u64, end: u64) -> Result<Vec<Range>, Error> {
+        let iter = self.db.iter_from_prefix(None, start.to_be_bytes()).unwrap();
+        
+        let mut result = vec![];
+        while {
+            iter.next()
+            if start < range.get_end() {
+                result.push(range.clone());
+                if !range.intersect(start, end) {
+                    break;
+                }
+            }
+        }
+    }
+    fn del(&self, start: u64, end: u64) -> Result<Vec<Range>, Error>;
+    fn put(&mut self, start: u64, end: u64, value: &[u8]) -> Result<(), Error>;
+
     fn get(&self, key: &[u8]) -> Result<Option<Vec<u8>>, Error> {
         self.db
             .get(None, key)
