@@ -7,5 +7,5 @@ pub trait RangeStore {
     /// delete ranges between start and end
     fn del(&self, start: u64, end: u64) -> Result<Box<[Range]>, Error>;
     /// put a range in start and end
-    fn put(&mut self, start: u64, end: u64, value: &[u8]) -> Result<(), Error>;
+    fn put(&self, start: u64, end: u64, value: &[u8]) -> Result<(), Error>;
 }

@@ -25,14 +25,14 @@ impl RangeDbMemoryImpl {
     pub fn del_batch(&self, start: u64, end: u64) -> Result<Box<[Range]>, Error> {
         let ranges = self.get(start, end)?;
         let mut db = self.ranges.write();
-        for range in ranges.clone().into_iter() {
+        for range in ranges.clone().iter() {
             db.remove(&range.get_end());
         }
         Ok(ranges.clone())
     }
-    pub fn put_batch(&mut self, ranges: &[Range]) -> Result<(), Error> {
+    pub fn put_batch(&self, ranges: &[Range]) -> Result<(), Error> {
         let mut db = self.ranges.write();
-        for range in ranges.into_iter() {
+        for range in ranges.iter() {
             db.insert(range.get_end(), range.clone());
         }
         Ok(())
@@ -59,7 +59,7 @@ impl RangeStore for RangeDbMemoryImpl {
     fn del(&self, start: u64, end: u64) -> Result<Box<[Range]>, Error> {
         self.del_batch(start, end)
     }
-    fn put(&mut self, start: u64, end: u64, value: &[u8]) -> Result<(), Error> {
+    fn put(&self, start: u64, end: u64, value: &[u8]) -> Result<(), Error> {
         let input_ranges = self.del_batch(start, end)?;
         let mut output_ranges = vec![];
         if !Self::validate_range(start, end) {
@@ -99,7 +99,7 @@ mod tests {
 
     #[test]
     fn test_get_same_range() {
-        let mut db = RangeDbMemoryImpl::open("test");
+        let db = RangeDbMemoryImpl::open("test");
         assert_eq!(db.put(0, 100, b"Alice is owner").is_ok(), true);
         assert_eq!(db.put(100, 200, b"Bob is owner").is_ok(), true);
         let result1 = db.get(100, 200).unwrap();
@@ -110,7 +110,7 @@ mod tests {
 
     #[test]
     fn test_get_small_range() {
-        let mut db = RangeDbMemoryImpl::open("test");
+        let db = RangeDbMemoryImpl::open("test");
         assert_eq!(db.put(0, 100, b"Alice is owner").is_ok(), true);
         assert_eq!(db.put(100, 120, b"Bob is owner").is_ok(), true);
         assert_eq!(db.put(120, 180, b"Carol is owner").is_ok(), true);
@@ -123,7 +123,7 @@ mod tests {
 
     #[test]
     fn test_get_large_range() {
-        let mut db = RangeDbMemoryImpl::open("test");
+        let db = RangeDbMemoryImpl::open("test");
         assert_eq!(db.put(0, 100, b"Alice is owner").is_ok(), true);
         assert_eq!(db.put(100, 120, b"Bob is owner").is_ok(), true);
         assert_eq!(db.put(120, 180, b"Carol is owner").is_ok(), true);
