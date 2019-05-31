@@ -1,6 +1,7 @@
 extern crate ethabi;
 extern crate rlp;
 
+use super::error::Error;
 use ethabi::Token;
 use ethereum_types::Address;
 
@@ -32,14 +33,20 @@ impl StateObject {
             Token::Bytes(self.data.clone()),
         ])
     }
-    pub fn from_abi(data: &[u8]) -> Result<Self, ethabi::Error> {
+    pub fn from_abi(data: &[u8]) -> Result<Self, Error> {
         let decoded: Vec<Token> = ethabi::decode(
             &[ethabi::ParamType::Address, ethabi::ParamType::Bytes],
             data,
-        )?;
-        let predicate = decoded[0].clone().to_address().unwrap();
-        let data = decoded[1].clone().to_bytes().unwrap();
-        Ok(StateObject::new(predicate, &data))
+        )
+        .map_err(|_e| Error::DecodeError)?;
+
+        let predicate = decoded[0].clone().to_address();
+        let data = decoded[1].clone().to_bytes();
+        if let (Some(predicate), Some(data)) = (predicate, data) {
+            Ok(StateObject::new(predicate, &data))
+        } else {
+            Err(Error::DecodeError)
+        }
     }
 }
 
