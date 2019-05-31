@@ -1,7 +1,7 @@
 extern crate ethabi;
 extern crate rlp;
 
-use super::error::Error;
+use super::error::{Error, ErrorKind};
 use ethabi::Token;
 use ethereum_types::Address;
 
@@ -38,14 +38,13 @@ impl StateObject {
             &[ethabi::ParamType::Address, ethabi::ParamType::Bytes],
             data,
         )
-        .map_err(|_e| Error::DecodeError)?;
-
+        .map_err(|_e| Error::from(ErrorKind::AbiDecode))?;
         let predicate = decoded[0].clone().to_address();
         let data = decoded[1].clone().to_bytes();
         if let (Some(predicate), Some(data)) = (predicate, data) {
             Ok(StateObject::new(predicate, &data))
         } else {
-            Err(Error::DecodeError)
+            Err(Error::from(ErrorKind::AbiDecode))
         }
     }
 }
