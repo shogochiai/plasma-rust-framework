@@ -24,7 +24,7 @@ impl RangeDb {
     fn validate_range(start: u64, end: u64) -> bool {
         start < end
     }
-    pub fn del_batch(&self, start: u64, end: u64) -> Result<Vec<Range>, Error> {
+    pub fn del_batch(&self, start: u64, end: u64) -> Result<Box<[Range]>, Error> {
         let ranges = self.get(start, end)?;
         let mut tr = DBTransaction::new();
         for range in ranges.clone().into_iter() {
@@ -54,7 +54,7 @@ impl RangeDb {
 }
 
 impl RangeStore for RangeDb {
-    fn get(&self, start: u64, end: u64) -> Result<Vec<Range>, Error> {
+    fn get(&self, start: u64, end: u64) -> Result<Box<[Range]>, Error> {
         let query = start.to_be_bytes();
         let iter = self.db.iter_from_prefix(Some(self.col), &query);
         let mut result = vec![];
@@ -68,9 +68,9 @@ impl RangeStore for RangeDb {
                 }
             }
         }
-        Ok(result)
+        Ok(result.into_boxed_slice())
     }
-    fn del(&self, start: u64, end: u64) -> Result<Vec<Range>, Error> {
+    fn del(&self, start: u64, end: u64) -> Result<Box<[Range]>, Error> {
         self.del_batch(start, end)
     }
     fn put(&mut self, start: u64, end: u64, value: &[u8]) -> Result<(), Error> {

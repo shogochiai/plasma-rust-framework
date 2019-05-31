@@ -24,7 +24,7 @@ pub trait KvsIterator {
 }
 
 pub trait KeyValueStore {
-    fn get(&self, key: &[u8]) -> Result<Option<Vec<u8>>, Error>;
+    fn get(&self, key: &[u8]) -> Result<Option<Box<[u8]>>, Error>;
     fn put(&mut self, key: &[u8], value: &[u8]) -> Result<(), Error>;
     fn del(&self, key: &[u8]) -> Result<(), Error>;
     fn has(&self, key: &[u8]) -> Result<bool, Error>;

@@ -22,7 +22,7 @@ impl RangeDbMemoryImpl {
     fn validate_range(start: u64, end: u64) -> bool {
         start < end
     }
-    pub fn del_batch(&self, start: u64, end: u64) -> Result<Vec<Range>, Error> {
+    pub fn del_batch(&self, start: u64, end: u64) -> Result<Box<[Range]>, Error> {
         let ranges = self.get(start, end)?;
         let mut db = self.ranges.write();
         for range in ranges.clone().into_iter() {
@@ -40,7 +40,7 @@ impl RangeDbMemoryImpl {
 }
 
 impl RangeStore for RangeDbMemoryImpl {
-    fn get(&self, start: u64, end: u64) -> Result<Vec<Range>, Error> {
+    fn get(&self, start: u64, end: u64) -> Result<Box<[Range]>, Error> {
         let db = self.ranges.read();
         let mut result = vec![];
         println!("get() {:?}, {:?}", start, end);
@@ -54,9 +54,9 @@ impl RangeStore for RangeDbMemoryImpl {
                 }
             }
         }
-        Ok(result)
+        Ok(result.into_boxed_slice())
     }
-    fn del(&self, start: u64, end: u64) -> Result<Vec<Range>, Error> {
+    fn del(&self, start: u64, end: u64) -> Result<Box<[Range]>, Error> {
         self.del_batch(start, end)
     }
     fn put(&mut self, start: u64, end: u64, value: &[u8]) -> Result<(), Error> {

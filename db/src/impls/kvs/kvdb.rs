@@ -18,11 +18,11 @@ impl DatabaseTrait for CoreDb {
 }
 
 impl KeyValueStore for CoreDb {
-    fn get(&self, key: &[u8]) -> Result<Option<Vec<u8>>, Error> {
+    fn get(&self, key: &[u8]) -> Result<Option<Box<[u8]>>, Error> {
         self.db
             .get(None, key)
             .map_err(Into::into)
-            .map(|v| v.map(|v| v.to_vec()))
+            .map(|v| v.map(|v| v.to_vec().into_boxed_slice()))
     }
     fn put(&mut self, key: &[u8], value: &[u8]) -> Result<(), Error> {
         let mut tr = DBTransaction::new();
