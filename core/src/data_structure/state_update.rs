@@ -77,6 +77,15 @@ impl StateUpdate {
             Err(Error::from(ErrorKind::AbiDecode))
         }
     }
+    pub fn get_start(&self) -> u64 {
+        self.start
+    }
+    pub fn get_end(&self) -> u64 {
+        self.end
+    }
+    pub fn get_block_number(&self) -> u64 {
+        self.block_number
+    }
 }
 
 #[cfg(test)]

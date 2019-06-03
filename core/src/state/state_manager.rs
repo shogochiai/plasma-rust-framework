@@ -1,9 +1,6 @@
 use crate::data_structure::error::Error;
 use crate::data_structure::{StateUpdate, Transaction};
-use plasma_db::impls::rangestore::memory::RangeDbMemoryImpl;
-use plasma_db::range::Range;
-use plasma_db::traits::db::DatabaseTrait;
-use plasma_db::traits::rangestore::RangeStore;
+use crate::state::{StateDb, VerifiedStateUpdate};
 
 struct MockPredicatePlugin {}
 impl MockPredicatePlugin {
@@ -17,11 +14,11 @@ impl MockPredicatePlugin {
 
 pub struct ResultOfExecuteTransaction {
     state_update: Box<StateUpdate>,
-    ranges: Box<[Range]>,
+    ranges: Box<[VerifiedStateUpdate]>,
 }
 
 impl ResultOfExecuteTransaction {
-    pub fn new(state_update: &StateUpdate, ranges: &[Range]) -> Self {
+    pub fn new(state_update: &StateUpdate, ranges: &[VerifiedStateUpdate]) -> Self {
         ResultOfExecuteTransaction {
             state_update: Box::new(state_update.clone()),
             ranges: ranges.to_vec().into_boxed_slice(),
@@ -30,36 +27,28 @@ impl ResultOfExecuteTransaction {
     pub fn get_state_update(&self) -> &StateUpdate {
         &self.state_update
     }
-    pub fn get_ranges(&self) -> &[Range] {
+    pub fn get_ranges(&self) -> &[VerifiedStateUpdate] {
         &self.ranges
     }
 }
 
 pub struct StateManager {
-    db: Box<RangeStore>,
+    db: Box<StateDb>,
 }
 
 impl Default for StateManager {
     fn default() -> Self {
         Self {
-            db: Box::new(RangeDbMemoryImpl::open("test")),
+            db: Default::default(),
         }
     }
 }
 
 impl StateManager {
-    fn ranges_to_state_update(ranges: &[Range]) -> Result<Vec<StateUpdate>, Error> {
-        ranges
-            .iter()
-            .map(|range| StateUpdate::from_abi(range.get_value()))
-            .collect()
-    }
-
     /// force to put state update
-    pub fn deposit(&self, start: u64, end: u64, value: &[u8]) -> Result<(), Error> {
+    pub fn deposit(&self, start: u64, end: u64, state_update: &StateUpdate) -> Result<(), Error> {
         self.db
-            .put(start, end, value)
-            .map_err::<Error, _>(Into::into)
+            .put_verified_state_update(&VerifiedStateUpdate::new(start, end, 0, state_update))
     }
 
     /// Execute a transaction
@@ -67,27 +56,29 @@ impl StateManager {
         &self,
         transaction: &Transaction,
     ) -> Result<ResultOfExecuteTransaction, Error> {
-        let _ranges = self
+        let verified_state_updates = self
             .db
-            .get(transaction.get_start(), transaction.get_end())
-            .map_err::<Error, _>(Into::into)?;
-        let state_updates = Self::ranges_to_state_update(&_ranges)?;
-        let new_state_updates: Vec<StateUpdate> = state_updates
+            .get_verified_state_updates(transaction.get_start(), transaction.get_end())?;
+        let new_state_updates: Vec<StateUpdate> = verified_state_updates
             .iter()
-            .map(|state_update| {
-                MockPredicatePlugin::execute_state_transition(state_update, transaction)
+            .map(|verified_state_update| {
+                MockPredicatePlugin::execute_state_transition(
+                    verified_state_update.get_state_update(),
+                    transaction,
+                )
             })
             .collect();
         // new_state_updates should has same state_update
         let new_state_update: &StateUpdate = &new_state_updates[0];
         self.db
-            .put(
-                transaction.get_start(),
-                transaction.get_end(),
-                &new_state_update.to_abi(),
-            )
-            .map_err::<Error, _>(Into::into)?;
-        Ok(ResultOfExecuteTransaction::new(new_state_update, &_ranges))
+            .put_verified_state_update(&VerifiedStateUpdate::from(
+                new_state_update.get_block_number(),
+                new_state_update,
+            ))?;
+        Ok(ResultOfExecuteTransaction::new(
+            new_state_update,
+            &verified_state_updates,
+        ))
     }
 }
 
@@ -122,7 +113,7 @@ mod tests {
         );
 
         let state_manager: StateManager = Default::default();
-        let deposit_result = state_manager.deposit(0, 100, &state_update.to_abi());
+        let deposit_result = state_manager.deposit(0, 100, &state_update);
         assert!(deposit_result.is_ok());
         let result = state_manager.execute_transaction(&transaction);
         assert!(result.is_ok());
@@ -143,7 +134,7 @@ mod tests {
         );
 
         let state_manager: StateManager = Default::default();
-        let deposit_result = state_manager.deposit(0, 100, &state_update.to_abi());
+        let deposit_result = state_manager.deposit(0, 100, &state_update);
         assert!(deposit_result.is_ok());
         let result = state_manager.execute_transaction(&transaction);
         assert!(result.is_ok());
@@ -165,12 +156,8 @@ mod tests {
         );
 
         let state_manager: StateManager = Default::default();
-        assert!(state_manager
-            .deposit(0, 100, &state_update1.to_abi())
-            .is_ok());
-        assert!(state_manager
-            .deposit(100, 200, &state_update2.to_abi())
-            .is_ok());
+        assert!(state_manager.deposit(0, 100, &state_update1).is_ok());
+        assert!(state_manager.deposit(100, 200, &state_update2).is_ok());
         let result = state_manager.execute_transaction(&transaction);
         assert!(result.is_ok());
     }
