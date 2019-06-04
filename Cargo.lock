@@ -843,6 +843,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "plasma-client"
+version = "0.1.0"
+dependencies = [
+ "ethabi 7.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ethereum-types 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "plasma-core 0.1.0",
+ "plasma-db 0.1.0",
+ "predicate-plugins 0.1.0",
+]
+
+[[package]]
 name = "plasma-core"
 version = "0.1.0"
 dependencies = [
@@ -850,7 +862,6 @@ dependencies = [
  "ethabi 7.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "ethereum-types 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "plasma-db 0.1.0",
  "rlp 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "tiny-keccak 1.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -897,6 +908,15 @@ dependencies = [
  "ethereum-types 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "jni 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "rlp 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "predicate-plugins"
+version = "0.1.0"
+dependencies = [
+ "ethabi 7.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ethereum-types 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "plasma-core 0.1.0",
 ]
 
 [[package]]

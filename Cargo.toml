@@ -14,9 +14,11 @@ name = "plasma-chamber"
 [workspace]
 members = [
 	"android",
+	"client",
 	"core",
 	"db",
 	"operator",
+	"predicate-plugins",
 	"sum_merkle_tree"
 ]
 

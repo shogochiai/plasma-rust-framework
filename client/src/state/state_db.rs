@@ -1,8 +1,8 @@
 extern crate ethabi;
 
-use crate::data_structure::error::{Error, ErrorKind};
-use crate::data_structure::StateUpdate;
+use crate::error::{Error, ErrorKind};
 use ethabi::Token;
+use plasma_core::data_structure::StateUpdate;
 use plasma_db::impls::rangestore::memory::RangeDbMemoryImpl;
 use plasma_db::traits::db::DatabaseTrait;
 use plasma_db::traits::rangestore::RangeStore;

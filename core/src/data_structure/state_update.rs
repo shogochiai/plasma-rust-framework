@@ -86,6 +86,9 @@ impl StateUpdate {
     pub fn get_block_number(&self) -> u64 {
         self.block_number
     }
+    pub fn get_state_object(&self) -> &StateObject {
+        &self.state_object
+    }
 }
 
 #[cfg(test)]

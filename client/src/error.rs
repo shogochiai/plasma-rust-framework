@@ -1,5 +1,5 @@
 //
-// Created on Wed May 08 2019
+// Created on Wed Jun 04 2019
 //
 // Copyright (c) 2019 Cryptoeconomics Lab, Inc.
 // This file is part of Plasma Chamber.
@@ -7,6 +7,7 @@
 
 use ethabi::Error as AbiDecodeError;
 use failure::{Backtrace, Context, Fail};
+use plasma_db::error::Error as PlasmaDbError;
 use std::fmt;
 use std::fmt::Display;
 use std::io::Error as IoError;
@@ -18,6 +19,8 @@ pub enum ErrorKind {
     Io,
     #[fail(display = "ABI Decode error")]
     AbiDecode,
+    #[fail(display = "Plasma Db error")]
+    PlasmaDbError,
 }
 
 #[derive(Debug)]
@@ -77,6 +80,14 @@ impl From<AbiDecodeError> for Error {
     fn from(_error: AbiDecodeError) -> Error {
         Error {
             inner: Context::from(ErrorKind::AbiDecode),
+        }
+    }
+}
+
+impl From<PlasmaDbError> for Error {
+    fn from(error: PlasmaDbError) -> Error {
+        Error {
+            inner: error.context(ErrorKind::PlasmaDbError),
         }
     }
 }
