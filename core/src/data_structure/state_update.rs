@@ -101,7 +101,6 @@ mod tests {
     fn test_abi_encode() {
         let parameters_bytes = Vec::from(&b"parameters"[..]);
         let state_object = StateObject::new(Address::zero(), &parameters_bytes);
-
         let state_update = StateUpdate::new(&state_object, 0, 100, 1, Address::zero());
         let encoded = state_update.to_abi();
         let decoded: StateUpdate = StateUpdate::from_abi(&encoded).unwrap();
