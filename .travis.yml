@@ -28,7 +28,7 @@ jobs:
     - stage: deploy
       rust: stable
       before_install:
-        - sh ci.sh
+        - sh android-ci.sh
       before_script:
         - rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android
         - cp ./android/config $HOME/.cargo/config
