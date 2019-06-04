@@ -47,6 +47,9 @@ impl StateObject {
             Err(Error::from(ErrorKind::AbiDecode))
         }
     }
+    pub fn get_predicate(&self) -> &Address {
+        &self.predicate
+    }
 }
 
 #[cfg(test)]

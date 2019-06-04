@@ -137,6 +137,9 @@ impl Transaction {
     pub fn get_end(&self) -> u64 {
         self.end
     }
+    pub fn get_parameters(&self) -> &[u8] {
+        &self.parameters
+    }
 }
 
 impl Encodable for Transaction {

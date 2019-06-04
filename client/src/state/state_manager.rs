@@ -1,16 +1,8 @@
-use crate::data_structure::error::Error;
-use crate::data_structure::{StateUpdate, Transaction};
+use crate::error::Error;
 use crate::state::{StateDb, VerifiedStateUpdate};
-
-struct MockPredicatePlugin {}
-impl MockPredicatePlugin {
-    pub fn execute_state_transition(
-        input: &StateUpdate,
-        _transaction: &Transaction,
-    ) -> StateUpdate {
-        input.clone()
-    }
-}
+use ethereum_types::Address;
+use plasma_core::data_structure::{StateUpdate, Transaction};
+use predicate_plugins::PredicateManager;
 
 pub struct ResultOfExecuteTransaction {
     state_update: Box<StateUpdate>,
@@ -62,10 +54,12 @@ impl StateManager {
         let new_state_updates: Vec<StateUpdate> = verified_state_updates
             .iter()
             .map(|verified_state_update| {
-                MockPredicatePlugin::execute_state_transition(
-                    verified_state_update.get_state_update(),
-                    transaction,
-                )
+                let predicate_address: &Address = verified_state_update
+                    .get_state_update()
+                    .get_state_object()
+                    .get_predicate();
+                PredicateManager::get_plugin(predicate_address)
+                    .execute_state_transition(verified_state_update.get_state_update(), transaction)
             })
             .collect();
         // new_state_updates should has same state_update
@@ -85,8 +79,8 @@ impl StateManager {
 #[cfg(test)]
 mod tests {
     use super::StateManager;
-    use crate::data_structure::{StateObject, StateUpdate, Transaction, Witness};
     use ethereum_types::{Address, H256};
+    use plasma_core::data_structure::{StateObject, StateUpdate, Transaction, Witness};
 
     fn create_state_update(start: u64, end: u64, block_number: u64) -> StateUpdate {
         StateUpdate::new(
