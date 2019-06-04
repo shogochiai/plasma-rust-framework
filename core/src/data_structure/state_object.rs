@@ -14,6 +14,16 @@ fn create_object_id(start: u64, end: u64) -> Vec<u8> {
 }
 */
 
+/// StateObject
+/// ## Example
+/// ```ignore
+/// StateObject.new(Address::zero(), &b"data"[..]);
+/// ```
+/// ```rust
+/// use plasma_core::data_structure::StateObject;
+/// use ethereum_types::Address;
+/// StateObject::new(Address::zero(), &b"data"[..]);
+/// ```
 #[derive(Clone, Debug, PartialEq)]
 pub struct StateObject {
     predicate: Address,
@@ -21,6 +31,7 @@ pub struct StateObject {
 }
 
 impl StateObject {
+    /// Creates new StateObject with predicate address and data
     pub fn new(predicate: Address, data: &[u8]) -> StateObject {
         StateObject {
             predicate,

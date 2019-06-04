@@ -28,6 +28,12 @@ impl Default for HttpOption {
     }
 }
 
+/// get server instance
+/// ## Example
+/// ```no_run
+/// use plasma_operator::server::get_server;
+/// get_server(&Default::default()).ok().unwrap().wait();
+/// ```
 pub fn get_server(options: &HttpOption) -> Result<Server, Error> {
     let mut io = IoHandler::new();
 
