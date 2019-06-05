@@ -19,7 +19,8 @@ members = [
 	"db",
 	"operator",
 	"predicate-plugins",
-	"sum_merkle_tree"
+	"sum_merkle_tree",
+  "event-watcher"
 ]
 
 [dependencies]
