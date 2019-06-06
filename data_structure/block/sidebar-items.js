@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Block","struct Block - has many `transactions` - has a `merkle root hash` - Traits   - Encodable   - Decodable"]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Transaction","struct Transaction - has a `plasma_contract_address` - has a `start` (A range element) - has a `end` (A range element) - has a `method_id` (like ABI) - has many `parameters` - has a `witness` (signature, proof or some) - Traits   - Encodable   - Decodable"],["Witness",""]]});

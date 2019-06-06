@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["_DERIVE_failure_Fail_FOR_ErrorKind",""],["_DERIVE_failure_core_fmt_Display_FOR_ErrorKind",""]],"enum":[["ErrorKind","error definition for plasma core."]],"struct":[["Error",""]]});
