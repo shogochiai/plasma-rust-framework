@@ -25,6 +25,7 @@ jobs:
         - cargo fmt --all -- --check
         - cargo clippy --all --all-targets --all-features -- -D warnings
         - cargo test --all
+        - cargo doc --no-deps --document-private-items --all
     - stage: deploy
       rust: stable
       before_install:
